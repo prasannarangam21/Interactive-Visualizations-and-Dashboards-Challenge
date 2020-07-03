@@ -7,7 +7,7 @@ function buildPlot(sample){
         var result = results[0];
         var sample_values = result.sample_values;
         var otu_ids = result.otu_ids;
-        console.log(otu_ids);
+        //console.log(otu_ids);
         var otu_labels = result.otu_labels;
         
         //Build a Bar Chart using the sample data
@@ -27,52 +27,44 @@ function buildPlot(sample){
 
         //Build a Bubble Chart using the sample data
         var bubbleData = [{
-            //type: "bubble",
+            type: 'scatter',
             y: sample_values,
             x: otu_ids,
             text: otu_labels,
             mode: 'markers',
             marker : {
                 size: sample_values,
-                color: otu_ids
+                color: otu_ids,
+                colorscale: "Earth"
             }
              
         }];
 
         var bubbleLayout = {
-            
+            margin: {t:30},
+            xaxis: {title:"OTU ID"},
+            yaxis: {title:"Sample Values"},
             title: "Belly Button Bacteria Bubble Chart"
         };
 
         Plotly.newPlot("bubble", bubbleData, bubbleLayout);
     });  
         
-        var pieData = [
-            {
-              values: sample_values.slice(0, 10),
-              labels: otu_ids.slice(0, 10),
-              hovertext: otu_labels.slice(0, 10),
-              hoverinfo: "hovertext",
-              type: "pie"
-            }];
-          
-          let pieLayout = {
-            margin: { t: 0, l: 0 }
-          };
-      
-          Plotly.plot("pie", pieData, pieLayout);
-      
+ 
 }
-function buildMetadata(newValue){
+function buildMetadata(sample){
     // Use d3 to select the panel with id of `#sample-metadata`
-    d3.json("samples.json").then((data) => {
-        console.log('data',data);
-        var metadata = d3.select("#sample-metadata");
-        metadata.html("");
-        Object.entries(data).forEach(([key, value]) => {
-        metadata.append("p").text(`${key}:${value}`);
-        })    
-    })
+    d3.json("/data/samples.json").then((data) => {
+        
+        var metadata = data.metadata;
+        var results = metadata.filter(d => d.id == sample);
+        var result = results[0];
+        var boxData = d3.select("#sample-metadata");
+        boxData.html("");
+        Object.entries(result).forEach(([key, value]) => {
+            boxData.append("h6").text(`${key}:${value}`);
+        });    
+    });
 }    
 
 function init(){
@@ -88,6 +80,7 @@ function init(){
         });
 
         buildPlot(name[0]);
+        buildMetadata(name[0]);
 
     });
 }    
